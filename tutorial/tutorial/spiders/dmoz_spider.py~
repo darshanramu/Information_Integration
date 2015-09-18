@@ -1,0 +1,48 @@
+import scrapy
+import sys
+from tutorial.items import DmozItem
+from scrapy.contrib.spiders import CrawlSpider, Rule
+from scrapy.contrib.linkextractors import LinkExtractor
+
+count = 0
+class DmozSpider(scrapy.Spider):
+    name = "dmoz"
+    allowed_domains = ["amazon.com"]
+    start_urls = [
+    	"http://www.amazon.com/Apple-iPhone-Silver-16-Unlocked/dp/B00NQGP3L6/ref=sr_1_1?s=wireless&ie=UTF8&qid=1441488617&sr=1-1&keywords=iphone+6"
+	#"http://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords=iphone+6"
+	#"http://www.amazon.com/Iphone-Custom-Design-Victorias-Secret/dp/B00UAFYBBE/ref=sr_1_1?m=A2WKLYWLT6HWWI&s=wireless&ie=UTF8&qid=1441487645&sr=1-1&keywords=iphone+6&refinements=p_6%3AA2WKLYWLT6HWWI"
+	
+    ]
+    """
+    rules = (
+    Rule(LinkExtractor(allow_domains=("amazon.com")), callback='parse_item',follow=True),
+	)
+	"""
+    def parse_item(self, response):
+    	global count
+    	
+    	print response.url
+    	x = response.xpath("/html/body/div/div/div/div/div/h1/span")
+    	#x = response.xpath("/html/body/div/div/div/div/div[@id='price']/tabl")
+    	if x:
+    		print x
+    		for sel in x:
+			    item = DmozItem()
+			    item['price'] = sel.xpath("//table//span[@id='priceblock_ourprice']/text()").extract()
+			    item['title'] = sel.xpath('/html/body/div/div/div/div/div/h1/span/text()').extract()
+			    item['link'] = response.url
+			    count+=1
+			    with open("result"+str(count)+".html","wb") as f:
+			    	f.write(response.body)
+			    
+			    #yield item"""
+			    print item
+			    
+		if count==2:
+			return
+    		
+    	else:
+    		print "Empty"
+    	
+     
